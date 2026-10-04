@@ -1,7 +1,250 @@
 {
   "version": 1,
-  "publicadoEn": null,
-  "grupos": [],
-  "personas": [],
-  "membresias": []
+  "publicadoEn": "2026-10-03T22:47:43-05:00",
+  "grupos": [
+    {
+      "id": "direccion",
+      "nombre": "Dirección"
+    },
+    {
+      "id": "creativo",
+      "nombre": "Creativo"
+    },
+    {
+      "id": "mesa-de-redaccion",
+      "nombre": "Mesa de redacción"
+    },
+    {
+      "id": "comunicaciones",
+      "nombre": "Comunicaciones"
+    },
+    {
+      "id": "fotografia",
+      "nombre": "Fotografia"
+    }
+  ],
+  "personas": [
+    {
+      "id": 1,
+      "nombre": "Carol Yulitza Moreno Parra",
+      "celular": "573197430307"
+    },
+    {
+      "id": 2,
+      "nombre": "Seryme Alejandra Pérez Vargas",
+      "celular": "573160500243"
+    },
+    {
+      "id": 3,
+      "nombre": "Julián Javier Díaz Valle",
+      "celular": "573007169664"
+    },
+    {
+      "id": 4,
+      "nombre": "Alejandra Ortiz Sierra",
+      "celular": "573117407550"
+    },
+    {
+      "id": 5,
+      "nombre": "Jeisson Alejandro Rodríguez Suárez",
+      "celular": "573212570562"
+    },
+    {
+      "id": 6,
+      "nombre": "Ana Sofia Rico Arias",
+      "celular": "573118322339"
+    },
+    {
+      "id": 7,
+      "nombre": "Amily Valentina Diaz Vieda",
+      "celular": "573232433453"
+    },
+    {
+      "id": 8,
+      "nombre": "Akemi Camila Amaya Garcia",
+      "celular": "573227310543"
+    },
+    {
+      "id": 9,
+      "nombre": "Ximena García Gallego",
+      "celular": "573184525067"
+    },
+    {
+      "id": 10,
+      "nombre": "Michelle Gabriela Ortegón",
+      "celular": "573102230225"
+    },
+    {
+      "id": 11,
+      "nombre": "Ana Sofia Peña Heredia",
+      "celular": "573041400096"
+    },
+    {
+      "id": 12,
+      "nombre": "Lina Alejandra Gutiérrez",
+      "celular": "573163617110"
+    },
+    {
+      "id": 13,
+      "nombre": "Sara Alejandra Muñoz Páez",
+      "celular": "573002915765"
+    },
+    {
+      "id": 14,
+      "nombre": "Maria Isabella Ospina Angulo"
+    },
+    {
+      "id": 15,
+      "nombre": "Helen Saray Zuluaga Rodrígues",
+      "celular": "573145962140"
+    },
+    {
+      "id": 16,
+      "nombre": "Sara Juliana Hómez Torres",
+      "celular": "573114617461"
+    },
+    {
+      "id": 17,
+      "nombre": "Daniel Felipe Melgarejo",
+      "celular": "573502147510"
+    },
+    {
+      "id": 18,
+      "nombre": "Farid Camilo Merchan Navarro",
+      "celular": "573168134580"
+    },
+    {
+      "id": 19,
+      "nombre": "Julián David Tibatá León",
+      "celular": "573053164702"
+    }
+  ],
+  "membresias": [
+    {
+      "persona": 1,
+      "grupo": "direccion",
+      "cargo": "Directora General, coordinadora de líderes, contacto directo con semilleros y grupos universitarios, etc",
+      "lidera": true
+    },
+    {
+      "persona": 2,
+      "grupo": "direccion",
+      "cargo": "Codirectora general, líder del departamento de redacción, contacto directo con directivos y demás personal universitario, recursos humanos, etc",
+      "lidera": true
+    },
+    {
+      "persona": 3,
+      "grupo": "creativo",
+      "cargo": "Líder de Departamento- Diseñador gráfico e Ilustrador",
+      "lidera": true
+    },
+    {
+      "persona": 4,
+      "grupo": "creativo",
+      "cargo": "Ilustrador",
+      "lidera": false
+    },
+    {
+      "persona": 5,
+      "grupo": "creativo",
+      "cargo": "Ilustrador",
+      "lidera": false
+    },
+    {
+      "persona": 6,
+      "grupo": "creativo",
+      "cargo": "Diseñador gráfico e Ilustrador",
+      "lidera": false
+    },
+    {
+      "persona": 2,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Líder del departamento- Escritora y correctora de estilo",
+      "lidera": true
+    },
+    {
+      "persona": 7,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo. Escritora",
+      "lidera": false
+    },
+    {
+      "persona": 8,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo. Escritora",
+      "lidera": false
+    },
+    {
+      "persona": 9,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo. Escritora",
+      "lidera": false
+    },
+    {
+      "persona": 10,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo",
+      "lidera": false
+    },
+    {
+      "persona": 11,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo y escritora",
+      "lidera": false
+    },
+    {
+      "persona": 12,
+      "grupo": "mesa-de-redaccion",
+      "cargo": "Correctora de estilo y escritora",
+      "lidera": false
+    },
+    {
+      "persona": 9,
+      "grupo": "comunicaciones",
+      "cargo": "Líder del departamento de Comunicaciones",
+      "lidera": true
+    },
+    {
+      "persona": 13,
+      "grupo": "comunicaciones",
+      "cargo": "Comunicadora social y periodista",
+      "lidera": false
+    },
+    {
+      "persona": 14,
+      "grupo": "comunicaciones",
+      "cargo": "Comunicadora social y periodista",
+      "lidera": false
+    },
+    {
+      "persona": 15,
+      "grupo": "comunicaciones",
+      "cargo": "Comunicadora social y periodista",
+      "lidera": false
+    },
+    {
+      "persona": 16,
+      "grupo": "fotografia",
+      "cargo": "Líder de departamento- Diseñadora gráfica y fotógrafa",
+      "lidera": true
+    },
+    {
+      "persona": 17,
+      "grupo": "fotografia",
+      "cargo": "Fotógrafo",
+      "lidera": false
+    },
+    {
+      "persona": 18,
+      "grupo": "fotografia",
+      "cargo": "Fotógrafo y crítico de cine",
+      "lidera": false
+    },
+    {
+      "persona": 19,
+      "grupo": "fotografia",
+      "cargo": "Fotógrafo",
+      "lidera": false
+    }
+  ]
 }
