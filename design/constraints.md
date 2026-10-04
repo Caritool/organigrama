@@ -1,7 +1,7 @@
 # Hoja de constraints — Organigrama de La Brújula
 
 > Estado: **aprobado** (3 oct 2026). Es el contrato: toda pantalla hereda de aquí y nada se re-decide por pantalla.
-> Pendiente: la fuente de la marca «La Brújula» (token `--f-marca`).
+> Pendiente, a cargo del equipo de diseño de La Brújula: la fuente de la marca (token `--f-marca`, hoy Figtree). Probador en `/fuente`.
 
 ## Programa
 
