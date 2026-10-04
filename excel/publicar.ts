@@ -10,8 +10,10 @@
  * únicamente para saber quién es quién.
  *
  * Reglas (design/constraints.md § Datos):
- * - Cada hoja con encabezado NOMBRE es un departamento, en el orden de las
- *   pestañas, salvo las de HOJAS_EXCLUIDAS. De "Líderes" solo sale la Dirección.
+ * - Es departamento toda hoja cuyo nombre empiece por «Depto de» o
+ *   «Departamento de», en el orden de las pestañas; el resto del nombre es el
+ *   nombre del departamento. De «Organigrama general» solo sale la Dirección.
+ *   Cualquier otra hoja (Integrantes General, Miembros antiguos…) se ignora.
  * - Lidera quien tenga un CARGO que empiece por «Líder».
  * - La consistencia se maneja con avisos: solo bloquea que a una hoja le falte
  *   una columna, porque eso publicaría un departamento entero sin datos.
@@ -27,8 +29,10 @@ const RAMA = "main";
 const RUTA = "data/organigrama.json";
 
 const HOJA_ESTADO = "Publicar";
-const HOJA_LIDERES = "Líderes";
-const HOJAS_EXCLUIDAS = ["General", "Miembros Antiguos", HOJA_ESTADO];
+const HOJA_DIRECCION = "Organigrama general";
+// El prefijo es la declaración explícita: copiar una hoja «Depto de …» crea un
+// departamento y quitarle el prefijo lo saca, sin tocar este script.
+const PREFIJO_DEPARTAMENTO = /^(depto\.?|departamento)\s+(de(l)?\s+)?/i;
 
 type Celda = string | number | boolean;
 
@@ -170,6 +174,13 @@ function leerFilas(hoja: HojaCruda, columnas: Columnas, avisos: string[]): Fila[
   return filas;
 }
 
+// "Depto de mesa de redacción" → "Mesa de redacción"; null si no es departamento.
+function nombreDepartamento(nombreHoja: string): string | null {
+  const resto = nombreHoja.replace(PREFIJO_DEPARTAMENTO, "").trim();
+  if (resto === nombreHoja || !resto) return null;
+  return resto[0].toLocaleUpperCase("es") + resto.slice(1);
+}
+
 const esLider = (cargo: string) => normalizar(cargo).startsWith("lider");
 const esDireccion = (cargo: string) => /\b(co)?direct(ora|or)\b/.test(normalizar(cargo));
 
@@ -180,19 +191,18 @@ function listarNombres(nombres: string[]): string {
 function construirOrganigrama(hojas: HojaCruda[], anterior: Organigrama | null, ahora: string): Resultado {
   const avisos: string[] = [];
   const errores: string[] = [];
-  const excluidas = HOJAS_EXCLUIDAS.map(normalizar);
-
   // 1. Qué hojas cuentan y con qué filas.
   const secciones: { grupo: Grupo; filas: Fila[] }[] = [];
   let direccion: Fila[] = [];
-  let hayLideres = false;
+  let hayHojaDireccion = false;
   for (const hoja of hojas) {
     const nombreHoja = hoja.nombre.trim();
-    const clave = normalizar(nombreHoja);
-    if (excluidas.indexOf(clave) >= 0) continue;
+    const esHojaDireccion = normalizar(nombreHoja) === normalizar(HOJA_DIRECCION);
+    const departamento = nombreDepartamento(nombreHoja);
+    if (!esHojaDireccion && !departamento) continue;
     const columnas = ubicarColumnas(hoja.valores);
     if (!columnas) {
-      avisos.push(`La hoja «${nombreHoja}» no tiene la columna NOMBRE; no se publicó.`);
+      errores.push(`La hoja «${nombreHoja}» no tiene la columna «NOMBRE COMPLETO». Revisa el encabezado y vuelve a publicar.`);
       continue;
     }
     const faltan = (["correo", "celular", "cargo"] as const)
@@ -203,8 +213,8 @@ function construirOrganigrama(hojas: HojaCruda[], anterior: Organigrama | null, 
       continue;
     }
     const filas = leerFilas(hoja, columnas, avisos);
-    if (clave === normalizar(HOJA_LIDERES)) {
-      hayLideres = true;
+    if (esHojaDireccion) {
+      hayHojaDireccion = true;
       direccion = filas.filter(f => esDireccion(f.cargo));
       continue;
     }
@@ -212,10 +222,11 @@ function construirOrganigrama(hojas: HojaCruda[], anterior: Organigrama | null, 
       avisos.push(`La hoja «${nombreHoja}» no tiene integrantes; no se publicó.`);
       continue;
     }
-    secciones.push({ grupo: { id: slug(nombreHoja), nombre: nombreHoja }, filas });
+    const nombre = departamento as string;
+    secciones.push({ grupo: { id: slug(nombre), nombre }, filas });
   }
-  if (!hayLideres) avisos.push(`No hay hoja «${HOJA_LIDERES}»: la Dirección queda vacía.`);
-  else if (!direccion.length) avisos.push(`En «${HOJA_LIDERES}» ningún cargo dice directora o codirectora: la Dirección queda vacía.`);
+  if (!hayHojaDireccion) avisos.push(`No hay hoja «${HOJA_DIRECCION}»: la Dirección queda vacía.`);
+  else if (!direccion.length) avisos.push(`En «${HOJA_DIRECCION}» ningún cargo dice directora o codirectora: la Dirección queda vacía.`);
   if (direccion.length) secciones.unshift({ grupo: { id: "direccion", nombre: "Dirección" }, filas: direccion });
 
   // 2. Personas (por correo) y membresías.

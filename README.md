@@ -27,19 +27,23 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
 
 ## Reglas del Excel
 
-- **Cada hoja es un departamento**, en el orden de las pestañas, si tiene el encabezado
-  de siempre (`NOMBRE COMPLETO · CORREO · CÉDULA · No. CELULAR · USUARIO DE REDES · PROGRAMA · CARGO`).
-  Para crear un departamento, copia una hoja; para quitarlo, bórrala.
-- **Excepciones**, que deben llamarse exactamente así:
-  - `Líderes`: de aquí solo sale la Dirección, es decir, las filas cuyo cargo dice directora o codirectora.
-  - `General` y `Miembros Antiguos`: no se publican.
-  - `Publicar`: es donde vive el botón y donde aparece el resultado.
+- **Departamento = hoja cuyo nombre empieza por «Depto de»** (o «Departamento de»),
+  en el orden de las pestañas. El resto del nombre es el nombre del departamento:
+  «Depto de mesa de redacción» se publica como «Mesa de redacción». Para crear un
+  departamento, copia una hoja «Depto de …»; para quitarlo, bórrala o quítale el prefijo.
+- **`Organigrama general`**: de aquí solo sale la Dirección, es decir, las filas cuyo cargo dice
+  directora o codirectora.
+- **Cualquier otra hoja se ignora**: `Integrantes General`, `Miembros antiguos`, `Publicar`
+  (donde vive el botón y aparece el resultado).
+- Columnas que lee: `NOMBRE COMPLETO` (o `NOMBRE`), `CORREO`, `No. CELULAR` y `CARGO`. El resto
+  (`CÉDULA`, `USUARIO DE REDES`, `PROGRAMA`) nunca se lee para publicar.
 - **Lidera** quien tenga un CARGO que empiece por «Líder».
 - A cada persona la identifica su **correo**: si alguien aparece en dos hojas con el
   mismo correo, es una sola persona en dos departamentos.
 - Publicar **avisa, no bloquea**: un departamento sin líder o con dos, alguien sin
-  celular, un departamento nuevo. Solo se niega a publicar si a una hoja le falta una
-  columna; en ese caso el organigrama sigue con la última versión buena.
+  celular, un departamento nuevo. Solo se niega a publicar si a una hoja «Depto de …» o a
+  `Organigrama general` le falta una columna; en ese caso el organigrama sigue con la última
+  versión buena.
 
 ## Puesta en marcha (una sola vez)
 
@@ -51,8 +55,9 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
 2. **Script en el Excel** (Excel para la web): *Automatizar → Nuevo script*, pega el
    contenido de [`excel/publicar.ts`](excel/publicar.ts), reemplaza `PEGAR_AQUI_EL_TOKEN`
    por el token y guárdalo como **Publicar**.
-3. **Botón**: crea una hoja llamada `Publicar`. En el panel del script, *… → Agregar
-   botón*, y ubícalo en esa hoja. El resultado de cada publicación aparece desde la celda A3.
+3. **Botón**: ejecuta el script una vez; crea la hoja `Publicar` y escribe el resultado desde
+   la celda A3. Ve a esa hoja y, en el panel del script, *… → Agregar en el libro*: aparece el
+   botón y el script queda compartido con quien edite el Excel.
 4. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root*.
 
 El token queda escrito dentro del script: cualquiera con permiso de edición del Excel
