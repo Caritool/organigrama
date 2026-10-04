@@ -1,0 +1,3 @@
+data/local.json
+*.xlsx
+node_modules/

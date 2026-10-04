@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>La Brújula · Organigrama</title>
+  <meta name="description" content="Quién lleva qué en La Brújula y cómo escribirle.">
+  <meta name="theme-color" content="#17382f">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="cabeza">
+      <h1 class="marca">La Brújula</h1>
+      <span class="etiqueta">Organigrama</span>
+    </header>
+    <div class="cuerpo">
+      <div class="buscar">
+        <label class="sr-only" for="buscar">Buscar</label>
+        <input type="search" id="buscar" placeholder="Busca un nombre, un cargo o un departamento" autocomplete="off" disabled>
+      </div>
+      <svg class="rueda" viewBox="0 0 360 360" role="group" aria-label="Ronda del grupo"></svg>
+      <div class="panel" aria-live="polite"></div>
+    </div>
+    <noscript><p>El organigrama necesita JavaScript para mostrarse.</p></noscript>
+  </main>
+</body>
+</html>

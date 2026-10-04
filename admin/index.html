@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>La Brújula · Editar</title>
+  <meta name="theme-color" content="#17382f">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <!--
+    Esta ruta no protege nada: la autorización la pone SharePoint. Solo quien
+    tenga permiso de edición sobre el Excel puede cambiar o publicar el
+    organigrama, conozca o no esta dirección.
+  -->
+  <main class="app admin">
+    <header class="cabeza">
+      <span class="marca">La Brújula</span>
+      <span class="etiqueta">Editar</span>
+    </header>
+
+    <div class="cuerpo" id="en-celular" hidden>
+      <h1>Ábrelo en un computador</h1>
+      <p>El organigrama se edita en el Excel de La Brújula, y eso solo se hace desde un computador.</p>
+    </div>
+
+    <div class="cuerpo" id="en-escritorio" hidden>
+      <h1>Abriendo el Excel de La Brújula…</h1>
+      <p>Cuando termines de editar, usa el botón Publicar de la hoja Publicar. Los cambios se ven en el organigrama en uno o dos minutos.</p>
+      <a class="accion" id="abrir" href="#">Abrir el Excel</a>
+      <p class="pie">Necesitas permiso de edición en el archivo. Si no lo tienes, pídeselo a la Dirección.</p>
+    </div>
+  </main>
+
+  <script>
+    const EXCEL = "https://utadeoeduco0-my.sharepoint.com/:x:/g/personal/labrujula_utadeo_edu_co/IQBzvBTEmusDSK9Xzwy0OtFAAeJp24mf8OM0kxWNWu8166I?e=KDH3Po";
+    // Editar en el celular es justo lo que no queremos: sin puntero fino o en
+    // pantalla angosta no se ofrece el Excel.
+    const escritorio = matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+    document.getElementById(escritorio ? "en-escritorio" : "en-celular").hidden = false;
+    if (escritorio) {
+      document.getElementById("abrir").href = EXCEL;
+      // Deja leer el recordatorio de Publicar antes de irse.
+      setTimeout(() => location.replace(EXCEL), 2500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Organigrama de La Brújula
+   Contrato visual: design/constraints.md. Un solo tema, bosque: al grupo no le
+   convenció el claro. Los componentes solo usan tokens semánticos, así que un
+   tema claro futuro es un bloque más aquí.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Primitivos: neutros teñidos hacia el turquesa (H 175) y una sola familia de acento */
+  --n-99: oklch(0.985 0.005 175);
+  --n-82: oklch(0.82 0.016 175);
+  --n-62: oklch(0.62 0.018 175);
+  --n-14: oklch(0.14 0.02 172);
+  --b-48: oklch(0.48 0.045 172);
+  --b-42: oklch(0.42 0.045 172);
+  --b-36: oklch(0.36 0.042 172);
+  --b-32: oklch(0.32 0.04 172);    /* bosque, ≈ #17382F de la marca */
+  --a-72: oklch(0.72 0.12 180);    /* turquesa, ≈ #22B5A5 */
+
+  /* Semánticos */
+  --bg: var(--b-32);
+  --text: var(--n-99);
+  --muted: var(--n-82);
+  --line: var(--b-42);
+  --seat: var(--b-42);
+  --seat-hover: var(--b-48);
+  --seat-text: var(--n-99);
+  --seat-dim: var(--b-36);
+  --seat-dim-text: var(--n-62);
+  --accent: var(--a-72);           /* único significado: coincide o puedes actuar */
+  --on-accent: var(--n-14);
+
+  --f-display: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-text: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Solo para la palabra La Brújula: la fuente más cercana a la del logo (pendiente). */
+  --f-marca: var(--f-display);
+  --t-xs: 13px; --t-s: 16px; --t-m: 20px; --t-l: 24px; --t-xl: 32px; --t-xxl: 40px;
+
+  --s-1: 4px; --s-2: 8px; --s-3: 16px; --s-4: 24px; --s-5: 32px; --s-6: 48px;
+
+  --dur-fast: 120ms; --dur: 200ms; --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--f-text);
+  font-size: var(--t-s);
+  line-height: 1.5;
+}
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 66ch; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Las clases que fijan display pisan al [hidden] del navegador; esto lo devuelve. */
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.etiqueta { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- Página ---------- */
+.app {
+  container-type: inline-size;
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: var(--s-3);
+  padding-block: calc(var(--s-3) + env(safe-area-inset-top, 0px)) calc(var(--s-5) + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  gap: var(--s-3);
+}
+.cabeza { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+.marca { font-family: var(--f-marca); font-size: var(--t-m); }
+.cuerpo { display: grid; gap: var(--s-3); }
+
+.buscar input {
+  width: 100%; min-height: 48px;
+  font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 0;
+  padding: var(--s-2) var(--s-3);
+  -webkit-appearance: none; appearance: none;
+}
+.buscar input::placeholder { color: var(--muted); opacity: 1; }
+.buscar input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.buscar input:disabled { opacity: 0.6; }
+
+/* ---------- La ronda ---------- */
+.rueda { width: 100%; max-width: 560px; height: auto; display: block; margin-inline: auto; overflow: visible; touch-action: manipulation; }
+.anillo { fill: none; stroke: var(--line); stroke-width: 1; }
+.asiento { cursor: pointer; outline: none; }
+.asiento .disco { fill: var(--seat); transition: fill var(--dur) var(--ease-out); }
+.asiento .halo { fill: none; stroke: transparent; stroke-width: 2; }
+.asiento text {
+  fill: var(--seat-text); font-family: var(--f-text); font-weight: 700; font-size: var(--t-xs);
+  text-anchor: middle; dominant-baseline: central; pointer-events: none;
+  transition: fill var(--dur) var(--ease-out);
+}
+.asiento.rep text { font-size: var(--t-s); }
+.asiento:hover .disco { fill: var(--seat-hover); }
+.asiento:focus-visible .halo { stroke: var(--text); }
+.rueda.hay-busqueda .asiento .disco { fill: var(--seat-dim); }
+.rueda.hay-busqueda .asiento text { fill: var(--seat-dim-text); }
+.rueda .asiento.coincide .disco { fill: var(--accent); }
+.rueda .asiento.coincide text { fill: var(--on-accent); }
+.rueda .asiento.foco .halo { stroke: var(--accent); }
+.rueda.densa .asiento text { display: none; }
+.arco { font-family: var(--f-text); font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--muted); }
+.aguja { stroke: var(--line); stroke-width: 2; fill: var(--line); transition: stroke var(--dur) var(--ease-out), fill var(--dur) var(--ease-out); }
+.rueda.con-foco .aguja { stroke: var(--accent); fill: var(--accent); }
+.centro { display: grid; justify-items: center; align-content: start; text-align: center; gap: var(--s-1); height: 100%; color: var(--text); font-family: var(--f-text); }
+.centro b { font-family: var(--f-display); font-size: var(--t-m); line-height: 1.2; text-wrap: balance; }
+.centro span { font-size: var(--t-xs); color: var(--muted); line-height: 1.3; }
+
+/* ---------- Panel ---------- */
+.panel { display: grid; gap: var(--s-3); min-height: 120px; align-content: start; }
+.ficha { display: grid; gap: var(--s-2); }
+.ficha h2 { font-size: var(--t-l); }
+.donde { color: var(--muted); }
+.accion {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 48px;
+  padding: var(--s-2) var(--s-4); margin-top: var(--s-2); justify-self: start;
+  background: var(--accent); color: var(--on-accent);
+  font-weight: 700; border: 0; border-radius: 0; cursor: pointer; text-decoration: none;
+}
+.secundaria { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.sin-wa { display: grid; gap: var(--s-2); justify-items: start; }
+.sin-wa .accion { margin-top: 0; }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.lista button {
+  width: 100%; min-height: 48px; padding: var(--s-2) 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3); align-items: center;
+  text-align: left; background: transparent; border: 0; border-radius: 0; cursor: pointer;
+}
+.lista button:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.lista small { color: var(--muted); font-size: var(--t-xs); }
+.pie { font-size: var(--t-xs); color: var(--muted); }
+
+@container (min-width: 720px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-areas: "rueda buscar" "rueda panel";
+    grid-template-rows: auto 1fr;
+    column-gap: var(--s-6);
+  }
+  .buscar { grid-area: buscar; }
+  .rueda { grid-area: rueda; }
+  .panel { grid-area: panel; }
+}
+
+/* ---------- /admin ---------- */
+.admin { max-width: 560px; }
+.admin h1 { font-size: var(--t-l); }
+.admin .cuerpo { gap: var(--s-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; }
+}
