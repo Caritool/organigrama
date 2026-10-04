@@ -7,6 +7,8 @@ botón para escribirle por WhatsApp.
 
 - Sitio: <https://labrujula-utadeo.github.io/>
 - Edición: <https://labrujula-utadeo.github.io/admin/> redirige al Excel (solo en computador)
+- Probador de fuentes para la marca: <https://labrujula-utadeo.github.io/fuente/>. Las 107 fuentes web
+  medidas contra el logo; ninguna es la del logo. Queda para el equipo de diseño.
 - Contrato de diseño y de datos: [`design/constraints.md`](design/constraints.md)
 
 ## Cómo funciona
