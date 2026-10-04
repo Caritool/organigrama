@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "publicadoEn": "2026-10-03T22:47:43-05:00",
+  "publicadoEn": "2026-10-04T15:01:46-05:00",
   "grupos": [
     {
       "id": "direccion",
@@ -91,30 +91,21 @@
     },
     {
       "id": 14,
-      "nombre": "Maria Isabella Ospina Angulo"
-    },
-    {
-      "id": 15,
-      "nombre": "Helen Saray Zuluaga Rodrígues",
-      "celular": "573145962140"
-    },
-    {
-      "id": 16,
       "nombre": "Sara Juliana Hómez Torres",
       "celular": "573114617461"
     },
     {
-      "id": 17,
+      "id": 15,
       "nombre": "Daniel Felipe Melgarejo",
       "celular": "573502147510"
     },
     {
-      "id": 18,
+      "id": 16,
       "nombre": "Farid Camilo Merchan Navarro",
       "celular": "573168134580"
     },
     {
-      "id": 19,
+      "id": 17,
       "nombre": "Julián David Tibatá León",
       "celular": "573053164702"
     }
@@ -212,36 +203,24 @@
     },
     {
       "persona": 14,
-      "grupo": "comunicaciones",
-      "cargo": "Comunicadora social y periodista",
-      "lidera": false
-    },
-    {
-      "persona": 15,
-      "grupo": "comunicaciones",
-      "cargo": "Comunicadora social y periodista",
-      "lidera": false
-    },
-    {
-      "persona": 16,
       "grupo": "fotografia",
       "cargo": "Líder de departamento- Diseñadora gráfica y fotógrafa",
       "lidera": true
     },
     {
-      "persona": 17,
+      "persona": 15,
       "grupo": "fotografia",
       "cargo": "Fotógrafo",
       "lidera": false
     },
     {
-      "persona": 18,
+      "persona": 16,
       "grupo": "fotografia",
       "cargo": "Fotógrafo y crítico de cine",
       "lidera": false
     },
     {
-      "persona": 19,
+      "persona": 17,
       "grupo": "fotografia",
       "cargo": "Fotógrafo",
       "lidera": false
