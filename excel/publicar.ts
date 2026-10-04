@@ -21,9 +21,13 @@
  * El resultado se escribe en la hoja "Publicar", donde vive el botón.
  */
 
-// Token fine-grained de la cuenta Caritool: solo el repo organigrama, permiso
-// Contents de lectura y escritura. Quien tenga edición del Excel puede verlo.
-const TOKEN = "PEGAR_AQUI_EL_TOKEN";
+// El token no vive en este código, que se copia y se comparte, sino en la hoja
+// HOJA_CONFIG (oculta y protegida). Es un token fine-grained de la cuenta
+// Caritool: solo el repo organigrama, permiso Contents de lectura y escritura.
+// Ocultar y proteger evita que se vea o se borre por accidente, pero no lo
+// cifra: quien tenga edición del Excel puede mostrar la hoja y leerlo.
+const HOJA_CONFIG = "Configuración";
+const CELDA_TOKEN = "B2";
 const REPO = "Caritool/organigrama";
 const RAMA = "main";
 const RUTA = "data/organigrama.json";
@@ -372,9 +376,9 @@ function ahoraBogota(): { iso: string; legible: string } {
   };
 }
 
-function cabeceras(): { [nombre: string]: string } {
+function cabeceras(token: string): { [nombre: string]: string } {
   return {
-    Authorization: `Bearer ${TOKEN}`,
+    Authorization: `Bearer ${token}`,
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
@@ -388,15 +392,15 @@ function explicarHttp(estado: number): string {
   return `GitHub respondió con el código ${estado}.`;
 }
 
-async function leerPublicado(): Promise<Publicado | null> {
-  const respuesta = await fetch(`https://api.github.com/repos/${REPO}/contents/${RUTA}?ref=${RAMA}`, { headers: cabeceras() });
+async function leerPublicado(token: string): Promise<Publicado | null> {
+  const respuesta = await fetch(`https://api.github.com/repos/${REPO}/contents/${RUTA}?ref=${RAMA}`, { headers: cabeceras(token) });
   if (respuesta.status === 404) return null;
   if (!respuesta.ok) throw new Error(explicarHttp(respuesta.status));
   const cuerpo = (await respuesta.json()) as ContenidoGitHub;
   return { sha: cuerpo.sha, datos: JSON.parse(desdeBase64(cuerpo.content)) as Organigrama };
 }
 
-async function subir(datos: Organigrama, sha: string | null): Promise<void> {
+async function subir(token: string, datos: Organigrama, sha: string | null): Promise<void> {
   const cuerpo: { [campo: string]: string } = {
     message: `datos(organigrama): publicación desde el Excel, ${datos.personas.length} personas`,
     content: aBase64(JSON.stringify(datos, null, 2) + "\n"),
@@ -405,7 +409,7 @@ async function subir(datos: Organigrama, sha: string | null): Promise<void> {
   if (sha) cuerpo.sha = sha;
   const respuesta = await fetch(`https://api.github.com/repos/${REPO}/contents/${RUTA}`, {
     method: "PUT",
-    headers: cabeceras(),
+    headers: cabeceras(token),
     body: JSON.stringify(cuerpo),
   });
   if (!respuesta.ok) throw new Error(explicarHttp(respuesta.status));
@@ -417,12 +421,29 @@ function escribirEstado(libro: ExcelScript.Workbook, lineas: string[]): void {
   hoja.getRange(`A3:A${2 + lineas.length}`).setValues(lineas.map(l => [l]));
 }
 
+// Devuelve el token o el motivo para no publicar. El token nunca se escribe en el estado.
+function leerToken(libro: ExcelScript.Workbook): { token: string } | { problema: string } {
+  const hoja = libro.getWorksheet(HOJA_CONFIG);
+  const donde = `la celda ${CELDA_TOKEN} de la hoja «${HOJA_CONFIG}»`;
+  if (!hoja) return { problema: `falta la hoja «${HOJA_CONFIG}» con el token de GitHub en ${CELDA_TOKEN} (ver README del repo).` };
+  const token = String(hoja.getRange(CELDA_TOKEN).getValue()).trim();
+  if (!token) return { problema: `${donde} está vacía. Pega ahí el token de GitHub.` };
+  if (!/^(github_pat_|ghp_)/.test(token)) return { problema: `lo que hay en ${donde} no parece un token de GitHub (empieza por github_pat_).` };
+  return { token };
+}
+
 function mensajeDe(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
 async function main(workbook: ExcelScript.Workbook): Promise<void> {
   escribirEstado(workbook, ["Publicando…"]);
+  const credencial = leerToken(workbook);
+  if ("problema" in credencial) {
+    escribirEstado(workbook, [`No se publicó: ${credencial.problema}`]);
+    return;
+  }
+  const { token } = credencial;
   const hojas: HojaCruda[] = workbook.getWorksheets().map(ws => {
     const usado = ws.getUsedRange(true);
     return { nombre: ws.getName(), valores: usado ? (usado.getValues() as Celda[][]) : [] };
@@ -430,7 +451,7 @@ async function main(workbook: ExcelScript.Workbook): Promise<void> {
 
   let publicado: Publicado | null;
   try {
-    publicado = await leerPublicado();
+    publicado = await leerPublicado(token);
   } catch (e) {
     escribirEstado(workbook, [`No se publicó: ${mensajeDe(e)}`]);
     return;
@@ -449,7 +470,7 @@ async function main(workbook: ExcelScript.Workbook): Promise<void> {
     return;
   }
   try {
-    await subir(datos, publicado ? publicado.sha : null);
+    await subir(token, datos, publicado ? publicado.sha : null);
   } catch (e) {
     escribirEstado(workbook, [`No se publicó: ${mensajeDe(e)}`]);
     return;

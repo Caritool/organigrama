@@ -52,17 +52,27 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
    - Repository access: *Only select repositories* → `organigrama`.
    - Permissions → Repository → *Contents: Read and write*. Nada más.
    - Expiration: un año. Cuando venza, Publicar dirá «el token no es válido o ya venció».
-2. **Script en el Excel** (Excel para la web): *Automatizar → Nuevo script*, pega el
-   contenido de [`excel/publicar.ts`](excel/publicar.ts), reemplaza `PEGAR_AQUI_EL_TOKEN`
-   por el token y guárdalo como **Publicar**.
-3. **Botón**: ejecuta el script una vez; crea la hoja `Publicar` y escribe el resultado desde
+2. **Token en el Excel**: crea una hoja llamada `Configuración`. En A2 escribe «Token de
+   GitHub» y en **B2** pega el token. Luego ocúltala (clic derecho en la pestaña → *Ocultar*)
+   y protégela (*Revisar → Proteger hoja*). Publicar lo lee de ahí; el código del script no
+   lleva ningún secreto.
+3. **Script en el Excel** (Excel para la web): *Automatizar → Nuevo script*, borra el código
+   de ejemplo, pega el contenido de [`excel/publicar.ts`](excel/publicar.ts) tal cual y guárdalo
+   como **Publicar**.
+4. **Botón**: ejecuta el script una vez; crea la hoja `Publicar` y escribe el resultado desde
    la celda A3. Ve a esa hoja y, en el panel del script, *… → Agregar en el libro*: aparece el
    botón y el script queda compartido con quien edite el Excel.
-4. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root*.
+5. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root* (ya está activo).
 
-El token queda escrito dentro del script: cualquiera con permiso de edición del Excel
-puede verlo. Esas mismas personas ya controlan los datos, y el token solo puede tocar
-este repo.
+**Sobre el token:** ocultar y proteger la hoja evita que se vea o se borre por accidente, pero
+no lo cifra. Cualquiera con permiso de edición del Excel puede mostrar la hoja y leerlo. Esas
+mismas personas ya controlan los datos, y el token solo puede tocar este repo. Para cambiarlo
+cuando venza: muestra la hoja, desprotégela, pega el nuevo en B2 y vuelve a ocultarla.
+
+¿Por qué Office Scripts y no Apps Script? Apps Script es de Google y solo corre sobre Google
+Sheets. El Excel vive en SharePoint, y lo que corre ahí (también en el navegador) son los
+Office Scripts de la pestaña *Automatizar*, que se escriben en TypeScript. Las macros VBA no
+corren en Excel para la web.
 
 ## Desarrollo local
 
