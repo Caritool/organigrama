@@ -2,7 +2,7 @@
  * Publicar — Office Script del Excel de La Brújula.
  *
  * Lee las hojas del libro, arma el organigrama y lo sube a
- * github.com/Caritool/organigrama como data/organigrama.json. GitHub Pages lo
+ * github.com/labrujula-utadeo/labrujula-utadeo.github.io como data/organigrama.json. GitHub Pages lo
  * sirve y la página lo dibuja.
  *
  * El repo es público, así que solo salen nombre, cargo, departamento y celular.
@@ -22,13 +22,14 @@
  */
 
 // El token no vive en este código, que se copia y se comparte, sino en la hoja
-// HOJA_CONFIG (oculta y protegida). Es un token fine-grained de la cuenta
-// Caritool: solo el repo organigrama, permiso Contents de lectura y escritura.
+// HOJA_CONFIG (oculta y protegida). Es un token fine-grained con la organización
+// labrujula-utadeo como dueña del recurso: solo este repo, permiso Contents de
+// lectura y escritura.
 // Ocultar y proteger evita que se vea o se borre por accidente, pero no lo
 // cifra: quien tenga edición del Excel puede mostrar la hoja y leerlo.
 const HOJA_CONFIG = "Configuración";
 const CELDA_TOKEN = "B2";
-const REPO = "Caritool/organigrama";
+const REPO = "labrujula-utadeo/labrujula-utadeo.github.io";
 const RAMA = "main";
 const RUTA = "data/organigrama.json";
 
@@ -386,8 +387,8 @@ function cabeceras(token: string): { [nombre: string]: string } {
 
 function explicarHttp(estado: number): string {
   if (estado === 401) return "el token no es válido o ya venció. Hay que generar uno nuevo (ver README del repo).";
-  if (estado === 403) return "el token no tiene permiso de escritura sobre el repo organigrama.";
-  if (estado === 404) return "no se encontró el repo. Revisa que el token tenga acceso a Caritool/organigrama.";
+  if (estado === 403) return `el token no tiene permiso de escritura sobre ${REPO}.`;
+  if (estado === 404) return `no se encontró el repo. Revisa que el token tenga acceso a ${REPO}.`;
   if (estado === 409 || estado === 422) return "alguien publicó al mismo tiempo. Vuelve a intentar.";
   return `GitHub respondió con el código ${estado}.`;
 }

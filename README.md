@@ -5,8 +5,8 @@ asiento más grande en el centro de su departamento, y nadie queda arriba: arrib
 es solo la posición de quien estás buscando. Tocar a alguien abre su ficha con un
 botón para escribirle por WhatsApp.
 
-- Sitio: <https://caritool.github.io/organigrama/>
-- Edición: <https://caritool.github.io/organigrama/admin/> redirige al Excel (solo en computador)
+- Sitio: <https://labrujula-utadeo.github.io/>
+- Edición: <https://labrujula-utadeo.github.io/admin/> redirige al Excel (solo en computador)
 - Contrato de diseño y de datos: [`design/constraints.md`](design/constraints.md)
 
 ## Cómo funciona
@@ -47,9 +47,10 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
 
 ## Puesta en marcha (una sola vez)
 
-1. **Token de GitHub** (desde la cuenta Caritool): *Settings → Developer settings →
-   Fine-grained tokens → Generate new token*.
-   - Repository access: *Only select repositories* → `organigrama`.
+1. **Token de GitHub**, desde una cuenta dueña de la organización (hoy Caritool):
+   <https://github.com/settings/personal-access-tokens/new>.
+   - Resource owner: **labrujula-utadeo**. Así la organización ve el token y puede revocarlo.
+   - Repository access: *Only select repositories* → `labrujula-utadeo.github.io`.
    - Permissions → Repository → *Contents: Read and write*. Nada más.
    - Expiration: un año. Cuando venza, Publicar dirá «el token no es válido o ya venció».
 2. **Token en el Excel**: crea una hoja llamada `Configuración`. En A2 escribe «Token de
@@ -63,6 +64,7 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
    la celda A3. Ve a esa hoja y, en el panel del script, *… → Agregar en el libro*: aparece el
    botón y el script queda compartido con quien edite el Excel.
 5. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root* (ya está activo).
+   Por llamarse `labrujula-utadeo.github.io`, el sitio queda en la raíz de ese dominio.
 
 **Sobre el token:** ocultar y proteger la hoja evita que se vea o se borre por accidente, pero
 no lo cifra. Cualquiera con permiso de edición del Excel puede mostrar la hoja y leerlo. Esas
