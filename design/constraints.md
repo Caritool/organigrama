@@ -73,6 +73,7 @@ Una sola familia, la verde de la marca. Neutros teñidos hacia H 175.
 
 - Fuente de verdad: el Excel de La Brújula en SharePoint. Columnas por hoja: `NOMBRE COMPLETO · CORREO · CÉDULA · No. CELULAR · USUARIO DE REDES · PROGRAMA · CARGO`.
 - Un Office Script **Publicar**, lanzado desde un botón en el Excel, valida las hojas y sube `data/organigrama.json` al repo, que es **público**.
+- **Acceso:** la página pide una contraseña (ventana modal) y `data/organigrama.json` se publica **cifrado** (AES-256-GCM, clave PBKDF2). Es lo único que protege los celulares, porque el repo es público. La contraseña vive en la hoja `Configuración`, celda B3, junto al token. Publicar nunca sube datos sin cifrar.
 - **Lista blanca de salida:** nombre, cargo, departamento y celular. La cédula, el correo, las redes y el programa nunca salen del Excel.
 - Identidad de una persona = **correo UTadeo normalizado**, porque un celular puede faltar o cambiar. Se lee y no se publica. El id público es un número de orden.
 - Si el mismo correo aparece en dos hojas, es una persona con dos membresías. Esto ya pasa hoy.

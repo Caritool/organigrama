@@ -24,8 +24,17 @@ Excel de La Brújula (SharePoint)
 El Excel es la única fuente de verdad. Nadie edita `data/organigrama.json` a mano:
 lo escribe Publicar.
 
-**El repo es público.** Publicar solo sube nombre, cargo, departamento y celular.
-La cédula, el correo, las redes y el programa nunca salen del Excel.
+**El repo es público, y el archivo de datos va cifrado.** Publicar solo sube nombre, cargo,
+departamento y celular, y lo cifra con AES-256-GCM usando la contraseña de la página (clave
+derivada con PBKDF2, 600 000 iteraciones). La página pide la contraseña en una ventana y descifra
+en el navegador; sin ella, `data/organigrama.json` es ilegible. La cédula, el correo, las redes y
+el programa nunca salen del Excel.
+
+Lo que esto protege y lo que no: protege contra quien encuentre el link o baje el archivo sin la
+contraseña. No protege contra quien la tenga (puede copiar los datos) ni contra quien intente
+adivinarla: el archivo es público, así que se puede atacar sin conexión. Por eso la contraseña
+debe ser larga, no una palabra. El historial de git conserva las publicaciones anteriores a la
+contraseña, que estaban en claro.
 
 ## Reglas del Excel
 
@@ -55,8 +64,8 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
    - Repository access: *Only select repositories* → `labrujula-utadeo.github.io`.
    - Permissions → Repository → *Contents: Read and write*. Nada más.
    - Expiration: un año. Cuando venza, Publicar dirá «el token no es válido o ya venció».
-2. **Token en el Excel**: crea una hoja llamada `Configuración`. En A2 escribe «Token de
-   GitHub» y en **B2** pega el token. Luego ocúltala (clic derecho en la pestaña → *Ocultar*)
+2. **Token y contraseña en el Excel**: crea una hoja llamada `Configuración`. En A2 escribe «Token de
+   GitHub» y en **B2** pega el token. En A3 escribe «Contraseña de la página» y en **B3** la contraseña. Luego ocúltala (clic derecho en la pestaña → *Ocultar*)
    y protégela (*Revisar → Proteger hoja*). Publicar lo lee de ahí; el código del script no
    lleva ningún secreto.
 3. **Script en el Excel** (Excel para la web): *Automatizar → Nuevo script*, borra el código
@@ -72,6 +81,10 @@ La cédula, el correo, las redes y el programa nunca salen del Excel.
 no lo cifra. Cualquiera con permiso de edición del Excel puede mostrar la hoja y leerlo. Esas
 mismas personas ya controlan los datos, y el token solo puede tocar este repo. Para cambiarlo
 cuando venza: muestra la hoja, desprotégela, pega el nuevo en B2 y vuelve a ocultarla.
+
+**Cambiar la contraseña:** cámbiala en B3 y presiona Publicar. Aunque los datos no hayan cambiado,
+Publicar vuelve a cifrar y sube el archivo nuevo cuando no puede abrir el anterior con la
+contraseña actual. Cada integrante tendrá que escribir la nueva la próxima vez que entre.
 
 ¿Por qué Office Scripts y no Apps Script? Apps Script es de Google y solo corre sobre Google
 Sheets. El Excel vive en SharePoint, y lo que corre ahí (también en el navegador) son los

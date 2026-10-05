@@ -5,15 +5,15 @@ const CELULAR = /^57\d{10}$/;
 
 export class OrganigramaInvalido extends Error {}
 
-export async function cargarOrganigrama(url) {
+export async function leerArchivo(url) {
   // GitHub Pages cachea 10 minutos; no-cache revalida con ETag para ver la
   // última publicación sin bajar el archivo si no cambió.
   const respuesta = await fetch(url, { cache: "no-cache" });
   if (!respuesta.ok) throw new Error(`No se pudo leer ${url}: HTTP ${respuesta.status}`);
-  return validar(await respuesta.json());
+  return respuesta.json();
 }
 
-function validar(d) {
+export function validar(d) {
   if (!d || !Array.isArray(d.grupos) || !Array.isArray(d.personas) || !Array.isArray(d.membresias)) {
     throw new OrganigramaInvalido("El archivo del organigrama no tiene grupos, personas y membresías.");
   }

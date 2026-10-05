@@ -27,8 +27,13 @@
 // lectura y escritura.
 // Ocultar y proteger evita que se vea o se borre por accidente, pero no lo
 // cifra: quien tenga edición del Excel puede mostrar la hoja y leerlo.
+// Lo mismo vale para la contraseña de la página (CELDA_CLAVE): con ella se cifra
+// el archivo que se sube, porque el repo es público y sin cifrar cualquiera
+// podría bajar los celulares sin pasar por la página.
+const ITERACIONES_PBKDF2 = 600000;
 const HOJA_CONFIG = "Configuración";
 const CELDA_TOKEN = "B2";
+const CELDA_CLAVE = "B3";
 const REPO = "labrujula-utadeo/labrujula-utadeo.github.io";
 const RAMA = "main";
 const RUTA = "data/organigrama.json";
@@ -326,8 +331,7 @@ function desdeUtf8(bytes: number[]): string {
   return texto;
 }
 
-function aBase64(texto: string): string {
-  const bytes = aUtf8(texto);
+function bytesABase64(bytes: ArrayLike<number>): string {
   let salida = "";
   for (let i = 0; i < bytes.length; i += 3) {
     const n = (bytes[i] << 16) | ((bytes[i + 1] ?? 0) << 8) | (bytes[i + 2] ?? 0);
@@ -338,7 +342,7 @@ function aBase64(texto: string): string {
   return salida;
 }
 
-function desdeBase64(base64: string): string {
+function base64ABytes(base64: string): number[] {
   const limpio = base64.replace(/[^A-Za-z0-9+/]/g, "");
   const bytes: number[] = [];
   for (let i = 0; i < limpio.length; i += 4) {
@@ -348,7 +352,57 @@ function desdeBase64(base64: string): string {
     if (i + 2 < limpio.length) bytes.push((n >> 8) & 255);
     if (i + 3 < limpio.length) bytes.push(n & 255);
   }
-  return desdeUtf8(bytes);
+  return bytes;
+}
+
+const aBase64 = (texto: string): string => bytesABase64(aUtf8(texto));
+const desdeBase64 = (base64: string): string => desdeUtf8(base64ABytes(base64));
+
+// ---------------------------------------------------------------------------
+// Cifrado: AES-256-GCM con clave derivada de la contraseña (PBKDF2-SHA256). El
+// formato lo lee js/lib/cifrado.js en la página; si cambia uno, cambia el otro.
+// ---------------------------------------------------------------------------
+
+interface Sobre {
+  version: 2;
+  publicadoEn: string | null;
+  cifrado: { algoritmo: "AES-256-GCM"; kdf: "PBKDF2-SHA256"; iteraciones: number; sal: string; iv: string };
+  datos: string;
+}
+
+async function derivarClave(clave: string, sal: Uint8Array, iteraciones: number): Promise<CryptoKey> {
+  const base = await crypto.subtle.importKey("raw", new Uint8Array(aUtf8(clave)), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: sal, iterations: iteraciones, hash: "SHA-256" },
+    base,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
+async function cifrar(datos: Organigrama, clave: string): Promise<Sobre> {
+  const sal = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const llave = await derivarClave(clave, sal, ITERACIONES_PBKDF2);
+  const cifrado = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, llave, new Uint8Array(aUtf8(JSON.stringify(datos))));
+  return {
+    version: 2,
+    publicadoEn: datos.publicadoEn,
+    cifrado: { algoritmo: "AES-256-GCM", kdf: "PBKDF2-SHA256", iteraciones: ITERACIONES_PBKDF2, sal: bytesABase64(sal), iv: bytesABase64(iv) },
+    datos: bytesABase64(new Uint8Array(cifrado)),
+  };
+}
+
+// null si la contraseña no abre el sobre (p. ej. se cambió desde la última publicación).
+async function descifrar(sobre: Sobre, clave: string): Promise<Organigrama | null> {
+  try {
+    const llave = await derivarClave(clave, new Uint8Array(base64ABytes(sobre.cifrado.sal)), sobre.cifrado.iteraciones);
+    const plano = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(base64ABytes(sobre.cifrado.iv)) }, llave, new Uint8Array(base64ABytes(sobre.datos)));
+    return JSON.parse(desdeUtf8(Array.from(new Uint8Array(plano)))) as Organigrama;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -362,7 +416,7 @@ interface ContenidoGitHub {
 
 interface Publicado {
   sha: string;
-  datos: Organigrama;
+  datos: Organigrama | null; // null: no se pudo abrir con la contraseña actual
 }
 
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -393,18 +447,20 @@ function explicarHttp(estado: number): string {
   return `GitHub respondió con el código ${estado}.`;
 }
 
-async function leerPublicado(token: string): Promise<Publicado | null> {
+async function leerPublicado(token: string, clave: string): Promise<Publicado | null> {
   const respuesta = await fetch(`https://api.github.com/repos/${REPO}/contents/${RUTA}?ref=${RAMA}`, { headers: cabeceras(token) });
   if (respuesta.status === 404) return null;
   if (!respuesta.ok) throw new Error(explicarHttp(respuesta.status));
   const cuerpo = (await respuesta.json()) as ContenidoGitHub;
-  return { sha: cuerpo.sha, datos: JSON.parse(desdeBase64(cuerpo.content)) as Organigrama };
+  const archivo = JSON.parse(desdeBase64(cuerpo.content));
+  // Un archivo sin cifrar (versión 1) es el de antes de la contraseña: se reemplaza.
+  return { sha: cuerpo.sha, datos: archivo.version === 2 ? await descifrar(archivo as Sobre, clave) : null };
 }
 
-async function subir(token: string, datos: Organigrama, sha: string | null): Promise<void> {
+async function subir(token: string, sobre: Sobre, personas: number, sha: string | null): Promise<void> {
   const cuerpo: { [campo: string]: string } = {
-    message: `datos(organigrama): publicación desde el Excel, ${datos.personas.length} personas`,
-    content: aBase64(JSON.stringify(datos, null, 2) + "\n"),
+    message: `datos(organigrama): publicación desde el Excel, ${personas} personas`,
+    content: aBase64(JSON.stringify(sobre, null, 2) + "\n"),
     branch: RAMA,
   };
   if (sha) cuerpo.sha = sha;
@@ -422,15 +478,17 @@ function escribirEstado(libro: ExcelScript.Workbook, lineas: string[]): void {
   hoja.getRange(`A3:A${2 + lineas.length}`).setValues(lineas.map(l => [l]));
 }
 
-// Devuelve el token o el motivo para no publicar. El token nunca se escribe en el estado.
-function leerToken(libro: ExcelScript.Workbook): { token: string } | { problema: string } {
+// Devuelve las credenciales o el motivo para no publicar. Nunca se escriben en el estado.
+function leerConfiguracion(libro: ExcelScript.Workbook): { token: string; clave: string } | { problema: string } {
   const hoja = libro.getWorksheet(HOJA_CONFIG);
-  const donde = `la celda ${CELDA_TOKEN} de la hoja «${HOJA_CONFIG}»`;
-  if (!hoja) return { problema: `falta la hoja «${HOJA_CONFIG}» con el token de GitHub en ${CELDA_TOKEN} (ver README del repo).` };
+  if (!hoja) return { problema: `falta la hoja «${HOJA_CONFIG}» con el token de GitHub en ${CELDA_TOKEN} y la contraseña de la página en ${CELDA_CLAVE} (ver README del repo).` };
   const token = String(hoja.getRange(CELDA_TOKEN).getValue()).trim();
-  if (!token) return { problema: `${donde} está vacía. Pega ahí el token de GitHub.` };
-  if (!/^(github_pat_|ghp_)/.test(token)) return { problema: `lo que hay en ${donde} no parece un token de GitHub (empieza por github_pat_).` };
-  return { token };
+  const clave = String(hoja.getRange(CELDA_CLAVE).getValue());
+  if (!token) return { problema: `la celda ${CELDA_TOKEN} de «${HOJA_CONFIG}» está vacía. Pega ahí el token de GitHub.` };
+  if (!/^(github_pat_|ghp_)/.test(token)) return { problema: `lo que hay en ${CELDA_TOKEN} de «${HOJA_CONFIG}» no parece un token de GitHub (empieza por github_pat_).` };
+  if (!clave) return { problema: `la celda ${CELDA_CLAVE} de «${HOJA_CONFIG}» está vacía. Escribe ahí la contraseña de la página.` };
+  if (typeof crypto === "undefined" || !crypto.subtle) return { problema: "este Excel no ofrece cifrado y no se publica sin cifrar." };
+  return { token, clave };
 }
 
 function mensajeDe(e: unknown): string {
@@ -439,12 +497,12 @@ function mensajeDe(e: unknown): string {
 
 async function main(workbook: ExcelScript.Workbook): Promise<void> {
   escribirEstado(workbook, ["Publicando…"]);
-  const credencial = leerToken(workbook);
+  const credencial = leerConfiguracion(workbook);
   if ("problema" in credencial) {
     escribirEstado(workbook, [`No se publicó: ${credencial.problema}`]);
     return;
   }
-  const { token } = credencial;
+  const { token, clave } = credencial;
   const hojas: HojaCruda[] = workbook.getWorksheets().map(ws => {
     const usado = ws.getUsedRange(true);
     return { nombre: ws.getName(), valores: usado ? (usado.getValues() as Celda[][]) : [] };
@@ -452,26 +510,26 @@ async function main(workbook: ExcelScript.Workbook): Promise<void> {
 
   let publicado: Publicado | null;
   try {
-    publicado = await leerPublicado(token);
+    publicado = await leerPublicado(token, clave);
   } catch (e) {
     escribirEstado(workbook, [`No se publicó: ${mensajeDe(e)}`]);
     return;
   }
 
   const ahora = ahoraBogota();
-  const { datos, avisos, errores } = construirOrganigrama(hojas, publicado ? publicado.datos : null, ahora.iso);
+  const { datos, avisos, errores } = construirOrganigrama(hojas, publicado && publicado.datos, ahora.iso);
   const conAvisos = (lineas: string[]) => lineas.concat(avisos.map(a => "· " + a));
 
   if (errores.length) {
     escribirEstado(workbook, conAvisos(["No se publicó. El organigrama sigue con la última versión publicada.", ...errores]));
     return;
   }
-  if (publicado && mismoContenido(publicado.datos, datos)) {
+  if (publicado && publicado.datos && mismoContenido(publicado.datos, datos)) {
     escribirEstado(workbook, conAvisos([`Sin cambios desde la última publicación. Revisado el ${ahora.legible}.`]));
     return;
   }
   try {
-    await subir(token, datos, publicado ? publicado.sha : null);
+    await subir(token, await cifrar(datos, clave), datos.personas.length, publicado ? publicado.sha : null);
   } catch (e) {
     escribirEstado(workbook, [`No se publicó: ${mensajeDe(e)}`]);
     return;

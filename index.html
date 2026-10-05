@@ -29,6 +29,16 @@
       <svg class="rueda" viewBox="0 0 360 360" role="group" aria-label="Ronda del grupo"></svg>
       <div class="panel" aria-live="polite"></div>
     </div>
+    <dialog id="acceso" aria-labelledby="acceso-titulo">
+      <form method="dialog">
+        <h2 id="acceso-titulo">Esta página tiene contraseña</h2>
+        <p class="donde">Pídesela a quien administra el grupo.</p>
+        <label class="sr-only" for="clave">Contraseña</label>
+        <input type="password" id="clave" autocomplete="current-password" required>
+        <p class="aviso" hidden role="alert"></p>
+        <button class="accion" type="submit">Entrar</button>
+      </form>
+    </dialog>
     <noscript><p>El organigrama necesita JavaScript para mostrarse.</p></noscript>
   </main>
 </body>

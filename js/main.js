@@ -1,10 +1,13 @@
 import { normalizar } from "./lib/texto.js";
-import { cargarOrganigrama, OrganigramaInvalido } from "./modules/datos.js";
+import { leerArchivo, validar, OrganigramaInvalido } from "./modules/datos.js";
+import { descifrar, ClaveIncorrecta } from "./lib/cifrado.js";
+import { pedirClave } from "./modules/acceso.js";
 import { crearRonda } from "./modules/ronda.js";
 import { crearPanel } from "./modules/panel.js";
 
 // ?local carga data/local.json, que genera tools/publicar-local.mjs y git ignora.
-const FUENTE = new URLSearchParams(location.search).has("local") ? "data/local.json" : "data/organigrama.json";
+const EN_LOCAL = new URLSearchParams(location.search).has("local");
+const FUENTE = EN_LOCAL ? "data/local.json" : "data/organigrama.json";
 const PALABRAS_LIDER = new Set(["lider", "lidera", "lideres"]);
 
 const input = document.querySelector("#buscar");
@@ -73,12 +76,40 @@ input.addEventListener("keydown", (e) => {
   if (primero) enfocar(ronda.asientoDe(primero.persona.id));
 });
 
+const CLAVE_GUARDADA = "organigrama-clave";
+const leerClave = () => { try { return localStorage.getItem(CLAVE_GUARDADA); } catch { return null; } };
+const guardarClave = (c) => { try { c ? localStorage.setItem(CLAVE_GUARDADA, c) : localStorage.removeItem(CLAVE_GUARDADA); } catch {} };
+
+// Los datos llegan cifrados: la contraseña de la página es la que los abre.
+async function abrir(archivo) {
+  if (!archivo.cifrado) {
+    // Sin cifrar solo se acepta en desarrollo: en producción sería saltarse la contraseña.
+    if (!EN_LOCAL) throw new OrganigramaInvalido("El archivo del organigrama no está cifrado.");
+    return validar(archivo);
+  }
+  let clave = leerClave();
+  let aviso = "";
+  for (;;) {
+    if (!clave) clave = await pedirClave(aviso);
+    try {
+      const datos = validar(await descifrar(archivo, clave));
+      guardarClave(clave);
+      return datos;
+    } catch (error) {
+      if (!(error instanceof ClaveIncorrecta)) throw error;
+      guardarClave(null);
+      clave = null;
+      aviso = "Contraseña incorrecta. Vuelve a intentarlo.";
+    }
+  }
+}
+
 async function iniciar() {
   input.disabled = true;
   ronda.mostrarCentro("Cargando…", "Trayendo el organigrama");
   panel.mensaje("Cargando el organigrama…");
   try {
-    datos = await cargarOrganigrama(FUENTE);
+    datos = await abrir(await leerArchivo(FUENTE));
   } catch (error) {
     console.error("organigrama: no se pudo cargar", FUENTE, error);
     const invalido = error instanceof OrganigramaInvalido;
