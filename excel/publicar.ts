@@ -452,7 +452,7 @@ async function leerPublicado(token: string, clave: string): Promise<Publicado | 
   if (respuesta.status === 404) return null;
   if (!respuesta.ok) throw new Error(explicarHttp(respuesta.status));
   const cuerpo = (await respuesta.json()) as ContenidoGitHub;
-  const archivo = JSON.parse(desdeBase64(cuerpo.content));
+  const archivo = JSON.parse(desdeBase64(cuerpo.content)) as { version: number };
   // Un archivo sin cifrar (versión 1) es el de antes de la contraseña: se reemplaza.
   return { sha: cuerpo.sha, datos: archivo.version === 2 ? await descifrar(archivo as Sobre, clave) : null };
 }
